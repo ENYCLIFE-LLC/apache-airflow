@@ -138,3 +138,26 @@ apache-airflow-providers-sqlite = "*"
 [requires]
 python_version = "3.9"
 ```
+
+### How to fix `WARNING - Because we cannot use more than 1 thread (parsing_processes = 2) when using sqlite. So we set parallelism to 1.`
+1. cd to `~/airflow`
+2. vi airflow.cfg
+3. change below configuration
+```sh
+[core]
+parallelism = 1
+
+load_examples = False
+```
+4. run `airflow db reset`
+5. run `airflow db init`
+6. run below command again
+```sh
+airflow users create \
+    --username admin \
+    --password admin \
+    --firstname Admin \
+    --lastname User \
+    --role Admin \
+    --email admin@example.com
+```
