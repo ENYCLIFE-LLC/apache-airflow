@@ -1,16 +1,11 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
+name = "pypi"
 
 [packages]
-apache-airflow = "*"
-apache-airflow-providers-amazon = "*"
-apache-airflow-providers-google = "*"
-apache-airflow-providers-postgres = "*"
-apache-airflow-providers-sqlite = "*"
+
+[dev-packages]
 
 [requires]
 python_version = "3.9"
