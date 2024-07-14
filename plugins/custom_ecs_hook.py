@@ -1,6 +1,7 @@
-import boto3
-from airflow.hooks.base_hook import BaseHook
+# /path/to/airflow/plugins/custom_ecs_hook.py
 
+from airflow.hooks.base_hook import BaseHook
+import boto3
 
 class CustomEcsHook(BaseHook):
     def __init__(self, aws_conn_id='aws_default', region_name=None):
@@ -19,7 +20,7 @@ class CustomEcsHook(BaseHook):
     def update_service(self, cluster_name, service_name, desired_count):
         return self.client.update_service(cluster=cluster_name, service=service_name, desiredCount=desired_count)
 
-    def create_service(self, cluster_name, service_name, task_definition, subnets, security_groups):
+    def create_service(self, cluster_name, service_name, task_definition, subnets, security_groups, target_group_arn, container_name, container_port):
         return self.client.create_service(
             cluster=cluster_name,
             serviceName=service_name,
@@ -32,5 +33,17 @@ class CustomEcsHook(BaseHook):
                     'assignPublicIp': 'ENABLED',
                     'securityGroups': security_groups
                 }
+            },
+            loadBalancers=[
+                {
+                    'targetGroupArn': target_group_arn,
+                    'containerName': container_name,
+                    'containerPort': container_port
+                }
+            ],
+            schedulingStrategy='REPLICA',
+            deploymentConfiguration={
+                'maximumPercent': 200,
+                'minimumHealthyPercent': 100
             }
         )
