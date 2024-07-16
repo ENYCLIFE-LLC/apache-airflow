@@ -1,3 +1,12 @@
+"""
+To achieve a workflow where Apache Airflow invokes a remote Lambda function that sends an event to SNS or SQS, and another service listens to SNS or SQS to execute a job:
+
+1. Invoke the Lambda Function from Airflow: Use the AwsLambdaInvokeFunctionOperator to invoke your Lambda function.
+2. Lambda Function Sends Event to SNS or SQS: The Lambda function sends an event to an SNS topic or SQS queue.
+3. Service Listens to SNS or SQS: Another service (e.g., AWS Batch, Fargate) is set up to listen to the SNS topic or SQS queue and execute a job.
+4. Monitor and Retrieve Job Status: Use additional Airflow operators or sensors to monitor the status of the jobs triggered by the SNS or SQS messages and retrieve the response data.
+"""
+
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.lambda_function import AwsLambdaInvokeFunctionOperator
 from airflow.operators.python_operator import PythonOperator

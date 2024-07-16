@@ -1,3 +1,10 @@
+"""
+To use Apache Airflow to invoke an AWS Lambda function and handle the flow of events triggered by that Lambda function (e.g., triggering AWS Batch or AWS Fargate jobs):
+
+1. Invoke the Lambda Function from Airflow: Use the AWSLambdaInvokeFunctionOperator to invoke your Lambda function.
+2. Handle the Event Flow in Lambda: The Lambda function will trigger other AWS services (like AWS Batch or Fargate).
+3. Fetch Data or Status from AWS Services: Use additional Airflow operators or sensors to monitor and retrieve the status or results from these services.
+"""
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.lambda_function import AwsLambdaInvokeFunctionOperator
 from airflow.operators.python_operator import PythonOperator
