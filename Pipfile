@@ -5,13 +5,20 @@ verify_ssl = true
 name = "pypi"
 
 [dev-packages]
+pytest = "*"
+pytest-cov = "*"
+black = "*"
+click = "*"
+behave = "*"
 
 [packages]
-apache-airflow = "*"
+apache-airflow = "==2.9.0"
 apache-airflow-providers-amazon = "*"
 apache-airflow-providers-google = "*"
 apache-airflow-providers-postgres = "*"
 apache-airflow-providers-sqlite = "*"
+apache-airflow-providers-https = "*"
+apache-airflow-providers-github = "*"
 
 
 [requires]
