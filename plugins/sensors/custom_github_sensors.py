@@ -17,9 +17,9 @@ from time import sleep
 from enum import Enum
 from datetime import datetime, timedelta, timezone
 
-from httpx import ReadTimeOut
-from airflow.providers.github.sensors.github import GitHubSensor
-from airflow.providers.github.hooks.github import GitHubHook
+from httpx import ReadTimeout
+from airflow.providers.github.sensors.github import GithubSensor
+from airflow.providers.github.hooks.github import GithubHook
 from github.GithubException import GithubException, RateLimitExceededException
 
 
@@ -55,7 +55,7 @@ def return_time_delta(time_delta: int, time_unit: AllowDeltaTimeType) -> timedel
         raise ValueError("Invalid time unit. Please choose from minutes, hours, days, or weeks.")
     
     
-class GitHubPRMergedSensor(GitHubSensor):
+class GitHubPRMergedSensor(GithubSensor):
     """
     Custom sensor to check if any pull request has been merged within delta_time.
     """
@@ -89,7 +89,7 @@ class GitHubPRMergedSensor(GitHubSensor):
         attempts = 0
         while attempts < self.retry_attempts:
             try:
-                hook = GitHubHook(github_conn_id=self.github_conn_id)
+                hook = GithubHook(github_conn_id=self.github_conn_id)
                 github_conn = hook.get_conn()
 
                 repo = github_conn.get_repo(f"{self.owner}/{self.repo}")
@@ -121,7 +121,7 @@ class GitHubPRMergedSensor(GitHubSensor):
                 logger.info("No pull requests merged within the last %d %s.", self.delta_time, self.delta_time_type)
                 return False  # Exit loop and task
 
-            except (RateLimitExceededException, GithubException, ReadTimeOut) as e:
+            except (RateLimitExceededException, GithubException, ReadTimeout) as e:
                 logger.error("GitHub connection error: %s.", str(e))
                 attempts += 1
                 if attempts < self.retry_attempts:
@@ -136,7 +136,7 @@ class GitHubPRMergedSensor(GitHubSensor):
         return False  # Exit loop and task
 
 
-class GitHubFileChangedSensor(GitHubSensor):
+class GitHubFileChangedSensor(GithubSensor):
     """
     Custom sensor to check if a specific file has changed in the latest commit within the last 24 hours.
     """
@@ -178,7 +178,7 @@ class GitHubFileChangedSensor(GitHubSensor):
         attempts = 0
         while attempts < self.retry_attempts:
             try:
-                hook = GitHubHook(github_conn_id=self.http_conn_id)
+                hook = GithubHook(github_conn_id=self.github_conn_id)
                 github_conn = hook.get_conn()
 
                 repo = github_conn.get_repo(f"{self.owner}/{self.repo}")
@@ -217,7 +217,7 @@ class GitHubFileChangedSensor(GitHubSensor):
                 logger.info("The file %s has not changed in the latest commit within the last 24 hours.", self.file_path)
                 return False  # Exit loop and task
 
-            except (RateLimitExceededException, GithubException, ReadTimeOut) as e:
+            except (RateLimitExceededException, GithubException, ReadTimeout) as e:
                 logger.error("GitHub connection error: %s.", str(e))
                 attempts += 1
                 if attempts < self.retry_attempts:

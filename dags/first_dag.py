@@ -1,7 +1,6 @@
 from airflow import DAG
 from airflow.operators.empty import EmptyOperator
-# from datetime import datetime, timedelta
-import datetime
+from datetime import datetime, timedelta
 
 default_args = {
     'owner': 'airflow',
@@ -14,8 +13,8 @@ dag = DAG(
     'first_dag',
     default_args=default_args,
     description='My first simple DAG',
-    schedule_interval=datetime.timedelta(days=2),
-    start_date=datetime.datetime(2024, 1, 1),
+    schedule_interval=timedelta(days=2),
+    start_date=datetime(2024, 1, 1),
 )
 
 t1 = EmptyOperator(
