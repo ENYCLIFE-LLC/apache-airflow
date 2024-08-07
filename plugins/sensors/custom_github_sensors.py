@@ -169,7 +169,7 @@ class GitHubFileChangedSensor(GithubSensor):
         self.delta_time_type = delta_time_type
         self.retry_attempts = retry_attempts
         self.retry_delay = retry_delay
-        self.last_checked_commit_sha = None  # Track the last processed commit
+        self.checked_commits_sha_list = []  # Track the last processed commit
 
     def poke(self, context):
         logger.info(
@@ -183,43 +183,57 @@ class GitHubFileChangedSensor(GithubSensor):
         attempts = 0
         while attempts < self.retry_attempts:
             try:
+                # Establish a connection to the GitHub using the token
                 hook = GithubHook(github_conn_id=self.github_conn_id)
                 github_conn = hook.get_conn()
 
                 repo = github_conn.get_repo(f"{self.owner}/{self.repo}")
-                branch = repo.get_branch(self.branch)
-                commit = branch.commit
 
                 # Get current time and time 24 hours ago in UTC
                 curr_dt = datetime.now(timezone.utc)  # Make current time timezone-aware
                 logging.info("current datetime: %s", curr_dt.strftime("%Y-%m-%d %H:%M:%S"))
                 past_commit_dt = curr_dt - return_time_delta(self.delta_time, self.delta_time_type)
-                logging.info("current datetime: %s", past_commit_dt.strftime("%Y-%m-%d %H:%M:%S"))
+                logging.info("past_commit_dt datetime: %s", past_commit_dt.strftime("%Y-%m-%d %H:%M:%S"))
 
-                commit_time = commit.commit.author.date
-                commit_time_aware = commit_time.astimezone(timezone.utc)
-                logger.info("Latest commit SHA: %s, committed at %s", commit.sha, commit_time_aware)
+                # Retrieve the list of commits on the branch since the specified time
+                # sha parameter is the commit SHA or branch name
+                commits = repo.get_commits(since=past_commit_dt, sha=self.branch)
+                logger.info("Total commits since %s: %d", past_commit_dt, commits.totalCount)
+                
+                for c in commits:
+                    logger.info("Commit SHA: %s, %s", c.sha, c.commit.author.date)
+                for commit in commits:
+                    if commit.sha in self.checked_commits_sha_list:
+                        logger.info("Skipped checked commit sha: %s", commit.sha)
+                        continue
+                    # Get the commit time
+                    commit_time = commit.commit.author.date
+                    commit_time_aware = commit_time.astimezone(timezone.utc)
+                    logger.info("Latest commit SHA: %s, committed at %s", commit.sha, commit_time_aware)
 
-                if self.last_checked_commit_sha and commit.sha == self.last_checked_commit_sha:
-                    logger.info("Resuming from the last processed commit SHA: %s", self.last_checked_commit_sha)
-                    return False  # No new commits to process
-
-                if commit_time_aware > past_commit_dt:
-                    logger.info(
-                        "Checking if the file %s has been changed in the latest commit on %s/%s branch %s.", 
-                        self.file_path,
-                        self.owner,
-                        self.repo,
-                        self.branch
-                    )
-                    files_changed = commit.files
-
-                    # Check if a specific file is changed
-                    file_changed = any(file.filename == self.file_path for file in files_changed)
-                    if file_changed:
-                        logger.info("The file %s has been changed in the latest commit.", self.file_path)
-                        self.last_checked_commit_sha = commit.sha  # Update the last processed commit
-                        return True
+                    if commit_time_aware > past_commit_dt:
+                        logger.info(
+                            "Checking... if the file %s has been changed in the latest commit on %s/%s branch %s.", 
+                            self.file_path,
+                            self.owner,
+                            self.repo,
+                            self.branch
+                        )
+                        files_changed = commit.files
+                        for _f in files_changed:
+                            logger.info("Changed file: %s", _f.filename)
+                        # Check if a specific file is changed
+                        file_changed = any(file.filename.lower() == (self.file_path).lower() for file in files_changed)
+                        if file_changed:
+                            logger.info("The file %s has been changed in the latest commit.", self.file_path)
+                            return True
+                        else:
+                            self.checked_commits_sha_list.append(commit.sha) 
+                            logger.info("Added the checked and not incldue the file %s commit sha to skip list: %s", self.file_path, commit.sha)
+                    else:
+                        # the commit date is out of the time frame
+                        self.checked_commits_sha_list.append(commit.sha) 
+                        logger.info("Added the checked and out scoped commit sha to skip list: %s", commit.sha)
 
                 logger.info("The file %s has NOT changed in the latest commit within the last 24 hours.", self.file_path)
                 return False  # Exit loop and task
