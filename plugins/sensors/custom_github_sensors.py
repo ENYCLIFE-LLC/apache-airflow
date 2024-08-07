@@ -21,6 +21,7 @@ from httpx import ReadTimeout
 from airflow.providers.github.sensors.github import GithubSensor
 from airflow.providers.github.hooks.github import GithubHook
 from github.GithubException import GithubException, RateLimitExceededException
+from airflow.exceptions import AirflowSensorTimeout
 
 
 # Initialize the logger
@@ -121,8 +122,8 @@ class GitHubPRMergedSensor(GithubSensor):
                 logger.info("No pull requests merged within the last %d %s.", self.delta_time, self.delta_time_type)
                 return False  # Exit loop and task
 
-            except (RateLimitExceededException, GithubException, ReadTimeout) as e:
-                logger.error("GitHub connection error: %s.", str(e))
+            except (RateLimitExceededException, GithubException, ReadTimeout, AirflowSensorTimeout) as e:
+                logger.error("Exception or Timeout: %s.", str(e))
                 attempts += 1
                 if attempts < self.retry_attempts:
                     logger.info("Retrying in %d seconds... (Attempt %d/%d)", self.retry_delay, attempts, self.retry_attempts)
@@ -217,8 +218,8 @@ class GitHubFileChangedSensor(GithubSensor):
                 logger.info("The file %s has not changed in the latest commit within the last 24 hours.", self.file_path)
                 return False  # Exit loop and task
 
-            except (RateLimitExceededException, GithubException, ReadTimeout) as e:
-                logger.error("GitHub connection error: %s.", str(e))
+            except (RateLimitExceededException, GithubException, ReadTimeout, AirflowSensorTimeout) as e:
+                logger.error("Exception or Timeout: %s.", str(e))
                 attempts += 1
                 if attempts < self.retry_attempts:
                     logger.info("Retrying in %d seconds... (Attempt %d/%d)", self.retry_delay, attempts, self.retry_attempts)
