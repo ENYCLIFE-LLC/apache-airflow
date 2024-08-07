@@ -107,7 +107,7 @@ class GitHubPRMergedSensor(GithubSensor):
                 for pr in pulls:
                     if self.last_checked_pr_number and pr.number <= self.last_checked_pr_number:
                         logger.info("Resuming from the last processed PR #%d", self.last_checked_pr_number)
-                        break
+                        break 
 
                     merged_at = pr.merged_at
                     if merged_at:
