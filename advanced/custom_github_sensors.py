@@ -100,10 +100,8 @@ class GitHubPRMergedSensor(GithubSensor):
 
                 # Get current time and time 24 hours ago in UTC
                 curr_dt = datetime.now(timezone.utc)  # Make current time timezone-aware
-                logging.info("current datetime: %s", curr_dt.strftime("%Y-%m-%d %H:%M:%S"))
                 past_pr_dt = curr_dt - return_time_delta(self.delta_time, self.delta_time_type)
-                logging.info("Checkpoint of the Pasted PR Merged datetime datetime: %s", past_pr_dt.strftime("%Y-%m-%d %H:%M:%S"))
-                
+
                 for pr in pulls:
                     if self.last_checked_pr_number and pr.number <= self.last_checked_pr_number:
                         logger.info("Resuming from the last processed PR #%d", self.last_checked_pr_number)
@@ -115,13 +113,11 @@ class GitHubPRMergedSensor(GithubSensor):
                         
                         # Make merged_at timezone-aware
                         merged_at_aware = merged_at.astimezone(timezone.utc)
-                        logging.info("The PR Merged datetime datetime: %s", merged_at_aware.strftime("%Y-%m-%d %H:%M:%S"))
+                        
                         if merged_at_aware > past_pr_dt:
                             logger.info("Found a merged pull request within the last 24 hours: PR #%d", pr.number)
                             self.last_checked_pr_number = pr.number  # Update the last processed PR
                             return True
-                else:
-                    logger.info("No Closed pull requests merged from the search")
 
                 logger.info("No pull requests merged within the last %d %s.", self.delta_time, self.delta_time_type)
                 return False  # Exit loop and task
@@ -191,14 +187,12 @@ class GitHubFileChangedSensor(GithubSensor):
                 commit = branch.commit
 
                 # Get current time and time 24 hours ago in UTC
-                curr_dt = datetime.now(timezone.utc)  # Make current time timezone-aware
-                logging.info("current datetime: %s", curr_dt.strftime("%Y-%m-%d %H:%M:%S"))
-                past_commit_dt = curr_dt - return_time_delta(self.delta_time, self.delta_time_type)
-                logging.info("current datetime: %s", past_commit_dt.strftime("%Y-%m-%d %H:%M:%S"))
+                cur_dt = datetime.now(timezone.utc)  # Make current time timezone-aware
+                past_commit_dt = cur_dt - return_time_delta(self.delta_time, self.delta_time_type)
 
                 commit_time = commit.commit.author.date
                 commit_time_aware = commit_time.astimezone(timezone.utc)
-                logger.info("Latest commit SHA: %s, committed at %s", commit.sha, commit_time_aware)
+                logger.debug("Latest commit SHA: %s, committed at %s", commit.sha, commit_time_aware)
 
                 if self.last_checked_commit_sha and commit.sha == self.last_checked_commit_sha:
                     logger.info("Resuming from the last processed commit SHA: %s", self.last_checked_commit_sha)
@@ -206,7 +200,7 @@ class GitHubFileChangedSensor(GithubSensor):
 
                 if commit_time_aware > past_commit_dt:
                     logger.info(
-                        "Checking if the file %s has been changed in the latest commit on %s/%s branch %s.", 
+                        "The file %s has been changed in the latest commit on %s/%s branch %s.", 
                         self.file_path,
                         self.owner,
                         self.repo,
@@ -221,7 +215,7 @@ class GitHubFileChangedSensor(GithubSensor):
                         self.last_checked_commit_sha = commit.sha  # Update the last processed commit
                         return True
 
-                logger.info("The file %s has NOT changed in the latest commit within the last 24 hours.", self.file_path)
+                logger.info("The file %s has not changed in the latest commit within the last 24 hours.", self.file_path)
                 return False  # Exit loop and task
 
             except (RateLimitExceededException, GithubException, ReadTimeout, AirflowSensorTimeout) as e:

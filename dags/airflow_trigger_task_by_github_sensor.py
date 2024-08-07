@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 DEFAULT_ARGS = {
-    'owner': 'jc course',
+    'owner': 'JC COURSE',
     'depends_on_past': False,
     'start_date': days_ago(1),
     'retries': 1,
@@ -28,7 +28,7 @@ with DAG(
     schedule_interval='@once',
     start_date=days_ago(1),
     catchup=False,
-    tags=['example'],
+    tags=['JC COURSE', 'Sensors'],
     default_args=DEFAULT_ARGS,
 ) as dag:
     pr_merge_sensor_task = GitHubPRMergedSensor(
