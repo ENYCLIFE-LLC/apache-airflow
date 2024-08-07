@@ -2,7 +2,6 @@
 name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-name = "pypi"
 
 [dev-packages]
 pytest = "*"
@@ -14,10 +13,6 @@ behave = "*"
 [packages]
 apache-airflow = "==2.9.0"
 apache-airflow-providers-amazon = "*"
-apache-airflow-providers-google = "*"
-apache-airflow-providers-postgres = "*"
-apache-airflow-providers-sqlite = "*"
-apache-airflow-providers-https = "*"
 apache-airflow-providers-github = "*"
 
 
