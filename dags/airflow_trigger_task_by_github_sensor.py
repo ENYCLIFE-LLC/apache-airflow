@@ -24,7 +24,7 @@ DEFAULT_ARGS = {
 }
 
 with DAG(
-    dag_id='airflow_trigger_task_by_github_sensor',
+    dag_id='3_airflow_trigger_task_by_github_sensor',
     schedule_interval='@once',
     start_date=days_ago(1),
     catchup=False,

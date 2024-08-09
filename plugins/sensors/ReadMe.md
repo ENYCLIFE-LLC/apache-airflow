@@ -108,3 +108,23 @@ class GitHubFileChangedSensor(GitHubSensor):
 ### Conclusion
 
 Using the `sha` parameter to specify the branch is a crucial aspect of precise monitoring in multi-branch repositories. It helps maintain context, ensures accurate change detection, and supports workflows that are dependent on branch-specific logic. This approach is essential for scenarios where different branches have different roles, responsibilities, and change histories.
+
+
+
+
+## GitHubSensors
+Polling Mechanism:
+
+The sensor typically uses a polling mechanism to repeatedly check GitHub for a specific condition. The poke method is the core part of this mechanism, which runs at regular intervals to see if the desired condition is met.
+Built-in API Integration:
+
+The sensor integrates directly with GitHub's API, abstracting away the complexity of making API requests. This makes it easier for developers to monitor GitHub repositories without needing to write custom API integration code.
+Predefined Conditions:
+
+The GitHubSensors usually come with predefined conditions that are commonly needed, such as checking if a file exists, if a pull request has been merged, or if a GitHub Action workflow has completed.
+Basic Error Handling:
+
+The provided sensor often includes basic error handling, such as retrying on network failures or handling rate limits. However, this may not cover all edge cases or specific error scenarios.
+Ease of Use:
+
+Because it’s a built-in sensor, it is designed for ease of use. It comes ready to be used in Airflow DAGs without requiring much configuration or customization. It’s useful for straightforward use cases where the default behavior is sufficient.
