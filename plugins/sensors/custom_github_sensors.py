@@ -1,6 +1,6 @@
 """
-The `GitHubSensor` does not have a `result_check` parameter. instead of, it uses the `hook` to interact with the GitHub API responses.
-I implemented two custom sensors that extend the `GitHubSensor` class to check if any pull request has been merged within the last 24 hours and if a specific file has changed in the latest commit within the last 24 hours.
+The `GitHubSensor` does not have a `result_check` parameter. Instead, it uses the `hook` to interact with the GitHub API responses.
+I implemented two custom sensors extending the `GitHubSensor` class to check if any pull request has been merged within the last 24 hours and if a specific file has changed in the latest commit within 24 hours.
 24 hours is the default time frame, but you can adjust it by changing the `` variable in the `poke` method.
 
 Understanding Sensor Behavior in Airflow:
@@ -9,7 +9,7 @@ until a condition is met or a timeout occurs. The poke method is called repeated
 2. Return Values: Returning True from poke signals the task is complete successfully. 
 Returning False keeps the sensor poking until it times out.
 3. Timeout Handling: Sensors need to handle a timeout gracefully, 
-meaning that they need to exit if they have not succeeded within a given time frame.
+meaning that they must exit if they have not succeeded within a given time frame.
 
 """
 import logging

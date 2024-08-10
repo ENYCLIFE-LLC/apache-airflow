@@ -8,6 +8,8 @@ from airflow.operators.empty import EmptyOperator
 from airflow.models.variable import Variable
 from airflow.utils.dates import days_ago
 from airflow.utils.trigger_rule import TriggerRule
+# following the local env setup, airflow.cfg has the plugins config setup,
+# so we can import the custom sensor without plugins
 from custom_github_sensors import GitHubPRMergedSensor, GitHubFileChangedSensor
 
 
@@ -31,15 +33,15 @@ with DAG(
     tags=['JC COURSE', 'Sensors'],
     default_args=DEFAULT_ARGS,
 ) as dag:
-    # pr_merge_sensor_task = GitHubPRMergedSensor(
-    #     task_id='check_pr_merged',
-    #     github_conn_id='github_default',
-    #     owner='ENYCLIFE-LLC',
-    #     repo='apache-airflow',
-    #     branch='master',
-    #     poke_interval=60, # Time invterval between pokes, the sensor will check the condition every 60 seconds
-    #     timeout=120, # Timeout for the sensor in seconds(2 mins)
-    # )
+    pr_merge_sensor_task = GitHubPRMergedSensor(
+        task_id='check_pr_merged',
+        github_conn_id='github_default',
+        owner='ENYCLIFE-LLC',
+        repo='apache-airflow',
+        branch='master',
+        poke_interval=60, # Time invterval between pokes, the sensor will check the condition every 60 seconds
+        timeout=120, # Timeout for the sensor in seconds(2 mins)
+    )
     
     file_change_sensor_task = GitHubFileChangedSensor(
         task_id='check_file_changed',
@@ -49,7 +51,7 @@ with DAG(
         branch='master',
         poke_interval=300, # Time invterval between pokes, the sensor will check the condition every 60 seconds
         timeout=600, # Timeout for the sensor in seconds(2 mins)
-        file_path='ReadMe.md', # the file name is not case sensitive
+        file_path='dags/airflow_trigger_task_by_github_sensor.py', # the file name is not case sensitive
     )
     
     process_results = EmptyOperator(
